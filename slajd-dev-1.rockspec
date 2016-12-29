@@ -21,7 +21,7 @@ build = {
   type = "builtin",
   modules = {
     ["slajd.slajd"] = "slajd/slajd.lua",
-    ["slajd.utils"] = "slajd/utils.lua"
+    ["slajd.utils"] = "slajd/utils.lua",
     ["slajd.parser"] = "slajd/parser.lua",
   },
   install = {
