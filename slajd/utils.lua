@@ -19,10 +19,17 @@ end
 
 _M.parse_color = function (txt)
   local nums = {}
-  for float in string.gmatch(txt, "[^%s]+") do
-    table.insert(nums, tonumber(float))
+  for numstr in string.gmatch(txt, "[^%s]+") do
+    local num = tonumber(numstr)
+    if num <= 1 and num >= 0 then
+      table.insert(nums, num)
+    elseif num > 1 and num < 256 then
+      table.insert(nums, num/255)
+    else
+      error("parse_color: A color number was either too big or negative.")
+    end
   end
-  assert(#nums == 3, "parse_color: A color must consist of 3 floats between 0 and 1(inclusive).")
+  assert(#nums == 3, "parse_color: A color must consist of 3 floats [0,1] or 3 integers (1,255].")
   return nums
 end
 
