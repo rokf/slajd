@@ -13,3 +13,5 @@ The text parser goes over read lines and checks their first character.
 - `$` means *image* (it's always centered)
 - `\n` is an empty line, next slide
 - if the first character doesn't match any of those it means text
+
+Move between slides with `<-` and `->` and reload from file(while open) with `F5`.

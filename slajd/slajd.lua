@@ -29,7 +29,7 @@ end
 
 -- create Gtk.HeaderBar instance
 header = Gtk.HeaderBar {
-  title = 'Present',
+  title = 'slajd',
   show_close_button = true
 }
 
