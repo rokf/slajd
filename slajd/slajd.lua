@@ -12,6 +12,12 @@ local window, header, canvas, data, slide
 slide = 1
 
 -- load slide data from suplied file name
+
+if #arg < 1 then
+  print("Needs one argument (the file to open).")
+  return
+end
+
 if string.sub(arg[1], -1, -3) == "lua" then
   data = dofile(arg[1])
 else
@@ -62,8 +68,9 @@ function canvas:on_draw(cr)
   -- the slide contains an image
   if data[slide].image ~= nil then
     cr:save()
-    cr:scale(width/data[slide].cairo_image.width,height/data[slide].cairo_image.height)
-    cr:set_source_surface(data[slide].cairo_image, 0,0)
+    local image_w, image_h = data[slide].cairo_image.width, data[slide].cairo_image.height
+    -- cr:scale(width/image_w, height/image_h)
+    cr:set_source_surface(data[slide].cairo_image, (width - image_w)/2,(height - image_h)/2)
     cr:paint()
     cr:restore() -- reset transformations to latest save
   end
