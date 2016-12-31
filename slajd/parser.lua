@@ -14,6 +14,9 @@ local processor = {
   text = function (txt)
     return string.sub(txt, 1, -2)
   end,
+  font = function (txt)
+    return string.sub(txt,2,-2)
+  end,
   color = function (txt) -- either foreground or background
     local location, color
     if string.sub(txt, 2,2) == "f" then
@@ -31,10 +34,9 @@ function _M.parse(text)
   data.theme = {}
   for line in string.gmatch(text, "([^\n]*\n)") do
     line_n = line_n + 1
-    if line == "\n" and line_n ~= 3 then
+    if line == "\n" and line_n >= 3 then
       table.insert(data,slide)
       slide = {}
-      print('BREAK', line)
     else
       local fst = string.sub(line, 1, 1)
       if fst == "#" then -- title
@@ -42,25 +44,23 @@ function _M.parse(text)
           slide.title = {}
         end
         table.insert(slide.title, processor.title(line))
-        print('TITLE', line)
+      elseif fst == "&" then -- font
+        data.theme.font = processor.font(line)
       elseif fst == "$" then -- image
         slide.image = processor.image(line)
-        print('IMAGE', line)
       elseif fst == "%" then -- color
         local color, location = processor.color(line)
-        if line_n < 3 then
+        if line_n <= 3 then
           data.theme[location] = color
         else
           slide[location] = color
         end
-        print('COLOR', line)
       else -- text
         if line ~= "\n" then
           if not slide.lines then
             slide.lines = {}
           end
           table.insert(slide.lines, processor.text(line))
-          print('TEXT', line)
         end
       end
     end

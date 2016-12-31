@@ -18,7 +18,7 @@ if #arg < 1 then
   return
 end
 
-if string.sub(arg[1], -1, -3) == "lua" then
+if string.sub(arg[1], -3, -1) == "lua" then
   data = dofile(arg[1])
 else
   local file = io.open(arg[1])
@@ -82,9 +82,15 @@ function canvas:on_draw(cr)
     cr:set_source_rgb(data.theme.foreground[1],data.theme.foreground[2],data.theme.foreground[3])
   end
 
+  -- set font
+  if data.theme.font then
+    cr.font_face = cairo.ToyFontFace.create(data.theme.font, cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
+  else
+    cr.font_face = cairo.ToyFontFace.create("Arial", cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
+  end
+
   if data[slide].title and (not (data[slide].text or data[slide].lines)) then -- title only
     cr:save()
-    cr.font_face = cairo.ToyFontFace.create("Fira Code Light", cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
     local t_lines
     if type(data[slide].title) == "string" then
       t_lines = utils.split(data[slide].title)
@@ -104,7 +110,7 @@ function canvas:on_draw(cr)
     cr:restore()
   elseif data[slide].title and (data[slide].text or data[slide].lines) then -- text and title
     cr:save()
-    cr.font_face = cairo.ToyFontFace.create("Fira Code Light", cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
+    -- cr.font_face = cairo.ToyFontFace.create("Fira Code Light", cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
     -- title part
     if type(data[slide].title) == "string" then
       t_lines = utils.split(data[slide].title)
@@ -141,7 +147,7 @@ function canvas:on_draw(cr)
     cr:restore()
   elseif (not data[slide].title) and (data[slide].text or data[slide].lines) then -- text only
     cr:save()
-    cr.font_face = cairo.ToyFontFace.create("Fira Code Light", cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
+    -- cr.font_face = cairo.ToyFontFace.create("Fira Code Light", cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
     local split_strs
     if data[slide].lines ~= nil then
       split_strs = data[slide].lines
