@@ -7,6 +7,7 @@ It can read *Lua* and *text* files. Examples of those are included in the `/exam
 The text parser goes over read lines and checks their first character.
 
 - `#` means *title*
+- `&` means *font* and is applied to the whole presentation
 - `%` means *color*, its followed by a `b` or `f` and three numbers
   - `b` means background color
   - `f` means foreground color

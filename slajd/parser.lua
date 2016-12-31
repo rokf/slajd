@@ -34,7 +34,7 @@ function _M.parse(text)
   data.theme = {}
   for line in string.gmatch(text, "([^\n]*\n)") do
     line_n = line_n + 1
-    if line == "\n" and line_n >= 3 then
+    if line == "\n" and line_n > 4 then
       table.insert(data,slide)
       slide = {}
     else
@@ -50,7 +50,7 @@ function _M.parse(text)
         slide.image = processor.image(line)
       elseif fst == "%" then -- color
         local color, location = processor.color(line)
-        if line_n <= 3 then
+        if line_n < 4 then
           data.theme[location] = color
         else
           slide[location] = color
