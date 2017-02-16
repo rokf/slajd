@@ -98,7 +98,7 @@ function canvas:on_draw(cr)
       t_lines = data[slide].title
     end
     local llen, li = utils.lll(t_lines)
-    local fsize = height/(llen/2)
+    local fsize = height/(llen/3)
     cr:set_font_size(fsize)
     local lext = cr:text_extents(t_lines[li])
     for j,str in pairs(t_lines) do
@@ -110,7 +110,6 @@ function canvas:on_draw(cr)
     cr:restore()
   elseif data[slide].title and (data[slide].text or data[slide].lines) then -- text and title
     cr:save()
-    -- cr.font_face = cairo.ToyFontFace.create("Fira Code Light", cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
     -- title part
     if type(data[slide].title) == "string" then
       t_lines = utils.split(data[slide].title)
@@ -155,7 +154,7 @@ function canvas:on_draw(cr)
       split_strs = utils.split(data[slide].text)
     end
     local llen, li = utils.lll(split_strs)
-    local fsize = height/(llen/2)
+    local fsize = height/(llen/3)
     cr:set_font_size(fsize)
     local lext = cr:text_extents(split_strs[li]) -- get extents after setting the font size!
     for j, str in pairs(split_strs) do
