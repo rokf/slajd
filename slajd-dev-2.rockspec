@@ -1,5 +1,5 @@
 package = "slajd"
-version = "dev-1"
+version = "dev-2"
 
 source = {
   url = "git://github.com/ruml/slajd.git"
@@ -22,7 +22,7 @@ build = {
   modules = {
     ["slajd.slajd"] = "slajd/slajd.lua",
     ["slajd.utils"] = "slajd/utils.lua",
-    ["slajd.parser"] = "slajd/parser.lua",
+    ["slajd.lpeg_parser"] = "slajd/lpeg_parser.lua",
   },
   install = {
     bin = { "bin/slajd" }
