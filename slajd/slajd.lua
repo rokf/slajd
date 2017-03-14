@@ -3,29 +3,24 @@ local Gtk = lgi.require 'Gtk'
 local cairo = lgi.cairo
 local Gdk = lgi.Gdk
 
-local parser = require 'slajd.parser'
+local parser = require 'slajd.lpeg_parser'
 local utils = require 'slajd.utils'
 
-local window, header, canvas, data, slide
-
--- initially show the first slide
-slide = 1
-
--- load slide data from suplied file name
+local window, header, canvas
+local slide = 1
+local data = {}
+local images = {}
+local theme = {}
 
 if #arg < 1 then
-  print("Needs one argument (the file to open).")
+  print('Run with: slajd _path_to_file_')
   return
 end
 
-if string.sub(arg[1], -3, -1) == "lua" then
-  data = dofile(arg[1])
-else
-  local file = io.open(arg[1])
-  local txt = file:read("*all")
-  file:close()
-  data = parser.parse(txt)
-end
+local file = io.open(arg[1])
+local txt = file:read("*all")
+file:close()
+data = parser.parse(txt)
 
 -- create Gtk.HeaderBar instance
 header = Gtk.HeaderBar {
@@ -38,65 +33,94 @@ canvas = Gtk.DrawingArea {
   expand = true
 }
 
--- take image source string and create a ImageSurface from that source
+function load_theme()
+  local tslide = data[1]
+  for _,line in ipairs(tslide) do
+    if line.type == "background" then
+      theme.background = line[1]
+    elseif line.type == "foreground" then
+      theme.foreground = line[1]
+    elseif line.type == "font" then
+      theme.font = line[1]
+    end
+  end
+  table.remove(data,1)
+end
+
 function load_images()
-  for i,v in pairs(data) do
-    if v.image ~= nil then
-      data[i].cairo_image = cairo.ImageSurface.create_from_png(v.image)
+  for _,s in ipairs(data) do
+    for _,l in ipairs(s) do
+      if l.type == "image" then
+        if images[l[1]] == nil then
+          images[l[1]] = cairo.ImageSurface.create_from_png(l[1])
+        end
+      end
     end
   end
 end
 
--- when the data is loaded, append images
+load_theme()
 load_images()
 
--- drawing on DrawingArea
 function canvas:on_draw(cr)
   local width = self.width
   local height = self.height
+  local sd = {}
 
-  -- check if background color is overriden for current slide
-  if data[slide].background then
-    cr:set_source_rgb(data[slide].background[1],data[slide].background[2],data[slide].background[3])
+  for _,line in ipairs(data[slide]) do
+    if line.type == "background" then
+      sd.background = line[1]
+    elseif line.type == "foreground" then
+      sd.foreground = line[1]
+    elseif line.type == "text" then
+      if sd.text == nil then
+        sd.text = {}
+      end
+      table.insert(sd.text,line[1])
+    elseif line.type == "title" then
+      if sd.title == nil then
+        sd.title = {}
+      end
+      table.insert(sd.title,line[1])
+    elseif line.type == "image" then
+      sd.image = line[1]
+    end
+  end
+
+  if sd.background then
+    cr:set_source_rgb(sd.background[1],sd.background[2],sd.background[3])
   else
-    cr:set_source_rgb(data.theme.background[1],data.theme.background[2],data.theme.background[3])
+    cr:set_source_rgb(theme.background[1],theme.background[2],theme.background[3])
   end
 
   cr:fill()
   cr:paint()
 
-  -- the slide contains an image
-  if data[slide].image ~= nil then
+  if sd.image ~= nil then
     cr:save()
-    local image_w, image_h = data[slide].cairo_image.width, data[slide].cairo_image.height
+    local image_w, image_h = images[sd.image].width, images[sd.image].height
     -- cr:scale(width/image_w, height/image_h)
-    cr:set_source_surface(data[slide].cairo_image, (width - image_w)/2,(height - image_h)/2)
+    cr:set_source_surface(images[sd.image], (width - image_w)/2,(height - image_h)/2)
     cr:paint()
-    cr:restore() -- reset transformations to latest save
+    cr:restore()
   end
 
-  -- check if the foreground color is overriden by the current slide
-  if data[slide].foreground then
-    cr:set_source_rgb(data[slide].foreground[1],data[slide].foreground[2],data[slide].foreground[3])
+  if sd.foreground then
+    cr:set_source_rgb(sd.foreground[1],sd.foreground[2],sd.foreground[3])
   else
-    cr:set_source_rgb(data.theme.foreground[1],data.theme.foreground[2],data.theme.foreground[3])
+    cr:set_source_rgb(theme.foreground[1],theme.foreground[2],theme.foreground[3])
   end
 
-  -- set font
-  if data.theme.font then
-    cr.font_face = cairo.ToyFontFace.create(data.theme.font, cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
+  if theme.font then
+    cr.font_face = cairo.ToyFontFace.create(theme.font, cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
   else
     cr.font_face = cairo.ToyFontFace.create("Arial", cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
   end
 
-  if data[slide].title and (not (data[slide].text or data[slide].lines)) then -- title only
+  if sd.title and (not sd.text) then -- title only
     cr:save()
     local t_lines
-    if type(data[slide].title) == "string" then
-      t_lines = utils.split(data[slide].title)
-    elseif type(data[slide].title) == "table" then
-      t_lines = data[slide].title
-    end
+    t_lines = sd.title
     local llen, li = utils.lll(t_lines)
     local fsize = height/(llen/3)
     cr:set_font_size(fsize)
@@ -108,14 +132,9 @@ function canvas:on_draw(cr)
       cr:show_text(str)
     end
     cr:restore()
-  elseif data[slide].title and (data[slide].text or data[slide].lines) then -- text and title
+  elseif sd.title and sd.text then -- text and title
     cr:save()
-    -- title part
-    if type(data[slide].title) == "string" then
-      t_lines = utils.split(data[slide].title)
-    elseif type(data[slide].title) == "table" then
-      t_lines = data[slide].title
-    end
+    t_lines = sd.title
     local llen, li = utils.lll(t_lines)
     local fsize = (height * (1/4))/(llen/2)
     cr:set_font_size(fsize)
@@ -126,13 +145,9 @@ function canvas:on_draw(cr)
       cr:move_to(horiz_pos, (height * 1/4)/2 + j*fsize - (#t_lines * fsize)/2)
       cr:show_text(str)
     end
-    -- text part
+
     local split_strs
-    if data[slide].lines ~= nil then
-      split_strs = data[slide].lines
-    else
-      split_strs = utils.split(data[slide].text)
-    end
+    split_strs = sd.text
     llen, li = utils.lll(split_strs)
     local fsize = height / (llen/2)
     cr:set_font_size(fsize)
@@ -144,15 +159,9 @@ function canvas:on_draw(cr)
       cr:show_text(str)
     end
     cr:restore()
-  elseif (not data[slide].title) and (data[slide].text or data[slide].lines) then -- text only
+  elseif (not sd.title) and sd.text then -- text only
     cr:save()
-    -- cr.font_face = cairo.ToyFontFace.create("Fira Code Light", cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
-    local split_strs
-    if data[slide].lines ~= nil then
-      split_strs = data[slide].lines
-    else
-      split_strs = utils.split(data[slide].text)
-    end
+    local split_strs = sd.text
     local llen, li = utils.lll(split_strs)
     local fsize = height/(llen/3)
     cr:set_font_size(fsize)
@@ -208,6 +217,7 @@ function window:on_key_press_event(event)
       file:close()
       data = parser.parse(txt)
     end
+    load_theme()
     load_images()
     canvas:queue_draw()
   end

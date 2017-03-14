@@ -1,4 +1,4 @@
-Tiny GTK slideshow application written in *Lua* with help of the amazing *lgi* module.
+A tiny GTK slideshow application written in *Lua* with help of the amazing *lgi* module.
 
 Can be installed with `sudo luarocks install slajd-dev-1.rockspec`.
 
