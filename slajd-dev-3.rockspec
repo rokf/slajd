@@ -1,20 +1,21 @@
 package = "slajd"
-version = "dev-2"
+version = "dev-3"
 
 source = {
-  url = "git://github.com/ruml/slajd.git"
+  url = "git://github.com/rokf/slajd.git"
 }
 
 description = {
   summary = "A tiny slideshow application",
-  homepage = "https://github.com/ruml/slajd",
+  homepage = "https://github.com/rokf/slajd",
   maintainer = "Rok Fajfar <snewix7@gmail.com>",
   license = "MIT"
 }
 
 dependencies = {
   "lua >= 5.1",
-  "lgi"
+  "lgi",
+  "lfs"
 }
 
 build = {

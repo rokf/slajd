@@ -2,6 +2,7 @@ local lgi = require 'lgi'
 local Gtk = lgi.require 'Gtk'
 local cairo = lgi.cairo
 local Gdk = lgi.Gdk
+local GLib = lgi.GLib
 
 local parser = require 'slajd.lpeg_parser'
 local utils = require 'slajd.utils'
@@ -11,6 +12,8 @@ local slide = 1
 local data = {}
 local images = {}
 local theme = {}
+
+local modification_time = 0
 
 if #arg < 1 then
   print('Run with: slajd _path_to_file_')
@@ -188,10 +191,28 @@ window = Gtk.Window {
 -- headerbar
 window:set_titlebar(header)
 
+local timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 200, function ()
+  local lm,m = utils.modified(arg[1],modification_time)
+  if m then
+    modification_time = lm
+    print('modified, reloading!')
+    local file = io.open(arg[1])
+    local txt = file:read("*all")
+    file:close()
+    data = parser.parse(txt)
+    load_theme()
+    load_images()
+    canvas:queue_draw()
+  end
+  return true
+end)
+
 -- destruction
 function window:on_destroy()
+  GLib.source_remove(timer)
   Gtk.main_quit()
 end
+
 
 -- keyboard events
 function window:on_key_press_event(event)
@@ -209,14 +230,10 @@ function window:on_key_press_event(event)
       canvas:queue_draw()
     end
   elseif event.keyval == Gdk.KEY_F5 then -- refresh slides
-    if string.sub(arg[1], -1, -3) == "lua" then
-      data = dofile(arg[1])
-    else
-      local file = io.open(arg[1])
-      local txt = file:read("*all")
-      file:close()
-      data = parser.parse(txt)
-    end
+    local file = io.open(arg[1])
+    local txt = file:read("*all")
+    file:close()
+    data = parser.parse(txt)
     load_theme()
     load_images()
     canvas:queue_draw()

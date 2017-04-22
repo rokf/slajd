@@ -1,7 +1,9 @@
 
-local _M = {}
+local lfs = require 'lfs'
 
-_M.split = function(str)
+local UTILS = {}
+
+UTILS.split = function(str)
   local t = {}
   for line in str:gmatch("([^\n]+)") do
     table.insert(t,line)
@@ -9,7 +11,7 @@ _M.split = function(str)
   return t
 end
 
-_M.lll = function (t)
+UTILS.lll = function (t)
   local l, li = 0, 0
   for i,v in pairs(t) do
     if #v > l then l = #v; li = i end
@@ -17,7 +19,7 @@ _M.lll = function (t)
   return l, li
 end
 
-_M.parse_color = function (txt)
+UTILS.parse_color = function (txt)
   local nums = {}
   for numstr in string.gmatch(txt, "[^%s]+") do
     local num = tonumber(numstr)
@@ -33,4 +35,12 @@ _M.parse_color = function (txt)
   return nums
 end
 
-return _M
+UTILS.modified = function (path,last)
+  local m = lfs.attributes(path,'modification')
+  if m > last then
+    return m, true
+  end
+  return last, false
+end
+
+return UTILS
