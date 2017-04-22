@@ -1,6 +1,6 @@
 A tiny GTK slideshow application written in *Lua* with help of the amazing *lgi* module.
 
-Can be installed with `sudo luarocks install slajd-dev-2.rockspec`.
+Can be installed with `sudo luarocks install slajd-dev-3.rockspec`.
 
 The text parser goes over lines and checks their first character.
 
