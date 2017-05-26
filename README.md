@@ -10,7 +10,7 @@ The text parser goes over lines and checks their first character.
   - `b` means background color
   - `f` means foreground color
 - `$` means *image* (it's always centered)
-- `\n` is a slide splitter
 - if the first character doesn't match any of those it means text
 
 Move between slides with `<-` and `->` and reload from file(while open) with `F5`.
+If you change the file while its being used it will be auto-reloaded.

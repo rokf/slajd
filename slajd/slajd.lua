@@ -125,7 +125,7 @@ function canvas:on_draw(cr)
     local t_lines
     t_lines = sd.title
     local llen, li = utils.lll(t_lines)
-    local fsize = height/(llen/3)
+    local fsize = math.sqrt(height^2 + width^2) / llen
     cr:set_font_size(fsize)
     local lext = cr:text_extents(t_lines[li])
     for j,str in pairs(t_lines) do
@@ -139,26 +139,26 @@ function canvas:on_draw(cr)
     cr:save()
     t_lines = sd.title
     local llen, li = utils.lll(t_lines)
-    local fsize = (height * (1/4))/(llen/2)
+    local fsize = math.sqrt(height^2 + width^2) / (llen * 2)
     cr:set_font_size(fsize)
     local lext = cr:text_extents(t_lines[li])
     for j,str in pairs(t_lines) do
       local extents = cr:text_extents(str)
       local horiz_pos = width/2 - (extents.width/2 + extents.x_bearing)
-      cr:move_to(horiz_pos, (height * 1/4)/2 + j*fsize - (#t_lines * fsize)/2)
+      cr:move_to(horiz_pos, (height / 5)/2 + j*fsize - (#t_lines * fsize)/2)
       cr:show_text(str)
     end
 
     local split_strs
     split_strs = sd.text
     llen, li = utils.lll(split_strs)
-    local fsize = height / (llen/2)
+    local fsize = math.sqrt(height^2 + width^2) / llen
     cr:set_font_size(fsize)
     lext = cr:text_extents(split_strs[li]) -- get extents after setting the font size!
     for j, str in pairs(split_strs) do
       local extents = cr:text_extents(str)
       local horiz_pos = width/2 - (lext.width/2 + lext.x_bearing)
-      cr:move_to(horiz_pos, (height / 2) + j*fsize - (#split_strs * fsize)/2)
+      cr:move_to(horiz_pos, ((height + (height / 5)) / 2) + j*fsize - (#split_strs * fsize)/2)
       cr:show_text(str)
     end
     cr:restore()
@@ -166,7 +166,7 @@ function canvas:on_draw(cr)
     cr:save()
     local split_strs = sd.text
     local llen, li = utils.lll(split_strs)
-    local fsize = height/(llen/3)
+    local fsize = math.sqrt(height^2 + width^2) / llen
     cr:set_font_size(fsize)
     local lext = cr:text_extents(split_strs[li]) -- get extents after setting the font size!
     for j, str in pairs(split_strs) do
