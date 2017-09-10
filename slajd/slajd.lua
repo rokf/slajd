@@ -4,6 +4,10 @@ local cairo = lgi.cairo
 local Gdk = lgi.Gdk
 local GLib = lgi.GLib
 
+local config = {
+  default_font = "Arial"
+}
+
 local parser = require 'slajd.lpeg_parser'
 local utils = require 'slajd.utils'
 
@@ -35,6 +39,14 @@ header = Gtk.HeaderBar {
 canvas = Gtk.DrawingArea {
   expand = true
 }
+
+-- convert to float if color is in int format
+local function ctf(num)
+  if tonumber(num) > 1 then
+    return tonumber(num)/255
+  end
+  return tonumber(num)
+end
 
 function load_theme()
   local tslide = data[1]
@@ -91,9 +103,9 @@ function canvas:on_draw(cr)
   end
 
   if sd.background then
-    cr:set_source_rgb(sd.background[1],sd.background[2],sd.background[3])
+    cr:set_source_rgb(ctf(sd.background[1]),ctf(sd.background[2]),ctf(sd.background[3]))
   else
-    cr:set_source_rgb(theme.background[1],theme.background[2],theme.background[3])
+    cr:set_source_rgb(ctf(theme.background[1]),ctf(theme.background[2]),ctf(theme.background[3]))
   end
 
   cr:fill()
@@ -109,15 +121,15 @@ function canvas:on_draw(cr)
   end
 
   if sd.foreground then
-    cr:set_source_rgb(sd.foreground[1],sd.foreground[2],sd.foreground[3])
+    cr:set_source_rgb(ctf(sd.foreground[1]),ctf(sd.foreground[2]),ctf(sd.foreground[3]))
   else
-    cr:set_source_rgb(theme.foreground[1],theme.foreground[2],theme.foreground[3])
+    cr:set_source_rgb(ctf(theme.foreground[1]),ctf(theme.foreground[2]),ctf(theme.foreground[3]))
   end
 
   if theme.font then
     cr.font_face = cairo.ToyFontFace.create(theme.font, cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
   else
-    cr.font_face = cairo.ToyFontFace.create("Arial", cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
+    cr.font_face = cairo.ToyFontFace.create(config.default_font, cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
   end
 
   if sd.title and (not sd.text) then -- title only
