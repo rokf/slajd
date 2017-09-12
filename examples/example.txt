@@ -2,17 +2,18 @@
 %b 1 1 1
 &DejaVu Sans
 
-#slajd
+# slajd
 %f 37 46 50
 
-#what it is
-- a tiny presentation application
+- a tiny Linux
+  presentation application
 - uses cairo for rendering
 - parses simple text based files
 %b 37 46 50
 %f 1 1 1
 
-# it has a few rules
+# rules
+
 - # creates a title
 - %b sets the background
 - %f the foreground

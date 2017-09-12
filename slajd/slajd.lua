@@ -48,7 +48,7 @@ local function ctf(num)
   return tonumber(num)
 end
 
-function load_theme()
+local function load_theme()
   local tslide = data[1]
   for _,line in ipairs(tslide) do
     if line.type == "background" then
@@ -62,7 +62,7 @@ function load_theme()
   table.remove(data,1)
 end
 
-function load_images()
+local function load_images()
   for _,s in ipairs(data) do
     for _,l in ipairs(s) do
       if l.type == "image" then
@@ -134,43 +134,14 @@ function canvas:on_draw(cr)
 
   if sd.title and (not sd.text) then -- title only
     cr:save()
-    local t_lines
-    t_lines = sd.title
-    local llen, li = utils.lll(t_lines)
+    local t_lines = sd.title
+    local llen, _ = utils.lll(t_lines)
     local fsize = math.sqrt(height^2 + width^2) / llen
     cr:set_font_size(fsize)
-    local lext = cr:text_extents(t_lines[li])
     for j,str in pairs(t_lines) do
       local extents = cr:text_extents(str)
       local horiz_pos = width/2 - (extents.width/2 + extents.x_bearing)
       cr:move_to(horiz_pos, height/2 + j*fsize - (#t_lines * fsize)/2)
-      cr:show_text(str)
-    end
-    cr:restore()
-  elseif sd.title and sd.text then -- text and title
-    cr:save()
-    t_lines = sd.title
-    local llen, li = utils.lll(t_lines)
-    local fsize = math.sqrt(height^2 + width^2) / (llen * 2)
-    cr:set_font_size(fsize)
-    local lext = cr:text_extents(t_lines[li])
-    for j,str in pairs(t_lines) do
-      local extents = cr:text_extents(str)
-      local horiz_pos = width/2 - (extents.width/2 + extents.x_bearing)
-      cr:move_to(horiz_pos, (height / 5)/2 + j*fsize - (#t_lines * fsize)/2)
-      cr:show_text(str)
-    end
-
-    local split_strs
-    split_strs = sd.text
-    llen, li = utils.lll(split_strs)
-    local fsize = math.sqrt(height^2 + width^2) / llen
-    cr:set_font_size(fsize)
-    lext = cr:text_extents(split_strs[li]) -- get extents after setting the font size!
-    for j, str in pairs(split_strs) do
-      local extents = cr:text_extents(str)
-      local horiz_pos = width/2 - (lext.width/2 + lext.x_bearing)
-      cr:move_to(horiz_pos, ((height + (height / 5)) / 2) + j*fsize - (#split_strs * fsize)/2)
       cr:show_text(str)
     end
     cr:restore()
@@ -182,7 +153,6 @@ function canvas:on_draw(cr)
     cr:set_font_size(fsize)
     local lext = cr:text_extents(split_strs[li]) -- get extents after setting the font size!
     for j, str in pairs(split_strs) do
-      local extents = cr:text_extents(str)
       local horiz_pos = width/2 - (lext.width/2 + lext.x_bearing)
       cr:move_to(horiz_pos, height/2 + j*fsize - (#split_strs * fsize)/2)
       cr:show_text(str)
@@ -208,10 +178,10 @@ local timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 200, function ()
   if m then
     modification_time = lm
     print('modified, reloading!')
-    local file = io.open(arg[1])
-    local txt = file:read("*all")
-    file:close()
-    data = parser.parse(txt)
+    local f = io.open(arg[1])
+    local t = f:read("*all")
+    f:close()
+    data = parser.parse(t)
     load_theme()
     load_images()
     canvas:queue_draw()
@@ -228,9 +198,11 @@ end
 
 -- keyboard events
 function window:on_key_press_event(event)
+
   -- check for shift and control key
-  local ctrl_on = event.state.CONTROL_MASK
-  local shift_on = event.state.SHIFT_MASK
+  -- local ctrl_on = event.state.CONTROL_MASK
+  -- local shift_on = event.state.SHIFT_MASK
+
   if event.keyval == Gdk.KEY_Left then -- previous slide
     if slide > 1 then
       slide = slide - 1
@@ -242,10 +214,10 @@ function window:on_key_press_event(event)
       canvas:queue_draw()
     end
   elseif event.keyval == Gdk.KEY_F5 then -- refresh slides
-    local file = io.open(arg[1])
-    local txt = file:read("*all")
-    file:close()
-    data = parser.parse(txt)
+    local f = io.open(arg[1])
+    local t = f:read("*all")
+    f:close()
+    data = parser.parse(t)
     load_theme()
     load_images()
     canvas:queue_draw()
